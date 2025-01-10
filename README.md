@@ -10,16 +10,16 @@
 
 2.執行以下指令啟動服務:
 ```bash
-docker-compose up -d
+docker compose up -d
 ```
 
 3.停止服務:
 ```bash
-docker-compose down
+docker compose down
 ```
 4.查看服務狀態:
 ```bash
-docker-compose ps
+docker compose ps
 ```
 ## 使用方式
 docker服務啟動完成後透過以下連結使用
