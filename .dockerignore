@@ -1,0 +1,10 @@
+**/[Oo]bj/
+**/[Bb]in/
+**/[Ll]ogs/
+**/.git/
+**/.vs/
+**/.vscode/
+**/node_modules/
+docker/
+README.md
+.gitignore

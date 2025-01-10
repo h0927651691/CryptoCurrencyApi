@@ -1,0 +1,58 @@
+# 定義服務配置
+services:
+  # API服務配置
+  api:
+    # 使用Dockerfile建構映像檔
+    build: 
+      # Dockerfile的上下文路徑
+      context: .
+      # Dockerfile的位置
+      dockerfile: docker/api/Dockerfile
+    # 設定環境變數
+    environment:
+      # 設定為開發環境
+      - ASPNETCORE_ENVIRONMENT=Development
+      # 資料庫連線字串
+      - ConnectionStrings__DefaultConnection=Server=sqlserver;Database=CryptoCurrency;User=sa;Password=YourStrong@Passw0rd;TrustServerCertificate=True
+    # 端口映射,主機端口5001映射到容器端口8080
+    ports:
+      - "5001:8080"
+    # 依賴sqlserver服務,確保sqlserver先啟動
+    depends_on:
+      - sqlserver
+
+  # SQL Server服務配置
+  sqlserver:
+    # 使用微軟官方SQL Server 2022映像檔
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    # 設定環境變數
+    environment:
+      # 同意使用者授權條款
+      - ACCEPT_EULA=Y
+      # 設定SA密碼
+      - MSSQL_SA_PASSWORD=YourStrong@Passw0rd
+      # 設定為開發者版本
+      - MSSQL_PID=Developer
+    # 端口映射,主機端口1433映射到容器端口1433
+    ports:
+      - "1433:1433"
+    # 健康檢查配置
+    healthcheck:
+      # 測試指令
+      test: /opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P "YourStrong@Passw0rd" -Q "SELECT 1" || exit 1
+      # 檢查間隔時間
+      interval: 10s
+      # 超時時間
+      timeout: 3s
+      # 重試次數
+      retries: 10
+      # 啟動等待時間
+      start_period: 5s
+    # 掛載卷配置
+    volumes:
+      # 掛載初始化腳本目錄
+      - ./docker/sqlserver/init:/docker-entrypoint-initdb.d
+      # 掛載初始化腳本
+      - ./docker/sqlserver/init.sh:/docker-entrypoint-initdb.d/init.sh
+    # 啟動指令,執行SQL Server並初始化資料庫
+    command: /bin/bash -c "/opt/mssql/bin/sqlservr & sleep 10s && /bin/bash /docker-entrypoint-initdb.d/init.sh && tail -f /dev/null"
